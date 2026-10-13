@@ -10,13 +10,18 @@ import {
   resolveTuiAgentLaunchEnv
 } from '../../../../shared/tui-agent-launch-defaults'
 import { tuiAgentToAgentKind } from '@/lib/telemetry'
+import {
+  requireExecutionHostPlatform,
+  type ExecutionHostPlatformFact
+} from '@/lib/execution-host-facts'
 
 export type QuickComposerStartupInput = {
   agent: TuiAgent | null
   prompt: string
   draftPrompt: string | null | undefined
   settings: GlobalSettings | null | undefined
-  platform: NodeJS.Platform
+  /** Withheld fails an agent launch; a workspace created without an agent never reads it. */
+  launchHost: ExecutionHostPlatformFact
   shell: AgentStartupShell | null | undefined
   isRemote: boolean
   telemetrySource: WorktreeCreationRequest['telemetrySource']
@@ -44,7 +49,7 @@ export function buildQuickComposerStartup(input: QuickComposerStartupInput): Qui
           cmdOverrides: settings?.agentCmdOverrides ?? {},
           agentArgs: resolveTuiAgentLaunchArgs(agent, settings?.agentDefaultArgs),
           agentEnv: resolveTuiAgentLaunchEnv(agent, settings?.agentDefaultEnv),
-          platform: input.platform,
+          platform: requireExecutionHostPlatform(input.launchHost),
           shell: input.shell ?? undefined,
           isRemote: input.isRemote,
           ...launchSessionOptions
@@ -70,7 +75,7 @@ export function buildQuickComposerStartup(input: QuickComposerStartupInput): Qui
       cmdOverrides: settings?.agentCmdOverrides ?? {},
       agentArgs: resolveTuiAgentLaunchArgs(agent, settings?.agentDefaultArgs),
       agentEnv: resolveTuiAgentLaunchEnv(agent, settings?.agentDefaultEnv),
-      platform: input.platform,
+      platform: requireExecutionHostPlatform(input.launchHost),
       shell: input.shell ?? undefined,
       isRemote: input.isRemote,
       allowEmptyPromptLaunch: true,
