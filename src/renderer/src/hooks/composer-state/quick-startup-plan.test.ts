@@ -8,7 +8,7 @@ function input(overrides: Partial<QuickComposerStartupInput>): QuickComposerStar
     prompt: '',
     draftPrompt: null,
     settings: { ...getDefaultSettings('/tmp'), agentDefaultArgs: { claude: '--model haiku' } },
-    platform: 'linux',
+    launchHost: { kind: 'known', platform: 'linux', hostKind: 'local' },
     shell: null,
     isRemote: false,
     telemetrySource: 'sidebar',
