@@ -105,6 +105,8 @@ export default function NewWorkspaceComposerCard(
   const branchNameInputId = React.useId()
   const projectDescriptionId = React.useId()
   const [sparseEditing, setSparseEditing] = React.useState(false)
+  // Why: Advanced is left out for an existing workspace, so its preset editor must not hold the form.
+  const sparseEditingActive = sparseEditing && !props.startsInExistingWorkspace
   const [addRemoteHostMode, setAddRemoteHostMode] = React.useState<AddRemoteHostMode | null>(null)
   const [setLocationOption, setSetLocationOption] = React.useState<NeedsProjectHostOption | null>(
     null
@@ -298,7 +300,7 @@ export default function NewWorkspaceComposerCard(
     <div
       ref={setComposerNode}
       data-workspace-composer-root="true"
-      data-sparse-preset-editing={sparseEditing ? 'true' : undefined}
+      data-sparse-preset-editing={sparseEditingActive ? 'true' : undefined}
       onDragEnter={dragHandlers.onDragEnter}
       onDragLeave={dragHandlers.onDragLeave}
       className={cn(
@@ -314,7 +316,7 @@ export default function NewWorkspaceComposerCard(
       <div className={cn('min-h-0 min-w-0 space-y-4 pt-3', contentClassName)}>
         <NewWorkspaceComposerProjectSection
           {...props}
-          disabled={sparseEditing}
+          disabled={sparseEditingActive}
           projectOptions={projectOptions}
           projectHostSetupOptions={projectHostSetupOptions}
           ephemeralVmRecipes={ephemeralVmRecipes}
@@ -331,11 +333,14 @@ export default function NewWorkspaceComposerCard(
           connectButtonLabel={connectButtonLabel}
           selectedProjectName={selectedProjectName}
         />
-        <NewWorkspaceComposerNameSection {...props} onNamePlainEnter={handleNamePlainEnter} />
+        {props.startsInExistingWorkspace ? null : (
+          <NewWorkspaceComposerNameSection {...props} onNamePlainEnter={handleNamePlainEnter} />
+        )}
         <NewWorkspaceComposerAgentSection
           {...props}
-          createDisabled={props.createDisabled || sparseEditing}
-          advancedLocked={sparseEditing}
+          createDisabled={props.createDisabled || sparseEditingActive}
+          advancedLocked={sparseEditingActive}
+          showAdvancedToggle={!props.startsInExistingWorkspace}
           visibleQuickAgents={visibleQuickAgents}
           defaultTuiAgent={defaultTuiAgent}
           handleSetDefaultAgent={handleSetDefaultAgent}
@@ -353,28 +358,31 @@ export default function NewWorkspaceComposerCard(
             ) : null
           }
         />
-        <NewWorkspaceComposerAdvancedSection
-          {...props}
-          onSparseEditingChange={setSparseEditing}
-          sparseEditing={sparseEditing}
-          branchNameInputId={branchNameInputId}
-          setupConfigLabel={setupConfigLabel}
-          setupRunLabel={setupRunLabel}
-          setupAskLabel={setupAskLabel}
-          setupRunButtonLabel={setupRunButtonLabel}
-          setupSkipButtonLabel={setupSkipButtonLabel}
-          showSetupAgentStartupPolicy={showSetupAgentStartupPolicy}
-          parentWorktreeId={parentWorktreeId}
-          onParentWorktreeIdChange={onParentWorktreeIdChange}
-          selectedRepoExecutionHostId={selectedRepoExecutionHostId}
-          selectedRepoProjectId={selectedRepoProjectId}
-          activeFolderWorkspaceId={activeFolderWorkspaceId}
-        />
+        {props.startsInExistingWorkspace ? null : (
+          <NewWorkspaceComposerAdvancedSection
+            {...props}
+            onSparseEditingChange={setSparseEditing}
+            sparseEditing={sparseEditing}
+            branchNameInputId={branchNameInputId}
+            setupConfigLabel={setupConfigLabel}
+            setupRunLabel={setupRunLabel}
+            setupAskLabel={setupAskLabel}
+            setupRunButtonLabel={setupRunButtonLabel}
+            setupSkipButtonLabel={setupSkipButtonLabel}
+            showSetupAgentStartupPolicy={showSetupAgentStartupPolicy}
+            parentWorktreeId={parentWorktreeId}
+            onParentWorktreeIdChange={onParentWorktreeIdChange}
+            selectedRepoExecutionHostId={selectedRepoExecutionHostId}
+            selectedRepoProjectId={selectedRepoProjectId}
+            activeFolderWorkspaceId={activeFolderWorkspaceId}
+          />
+        )}
       </div>
-      {!sparseEditing ? (
+      {!sparseEditingActive ? (
         <div className="shrink-0 space-y-1">
           <NewWorkspaceComposerFooter
             {...props}
+            showCreateMultiple={props.showCreateMultiple && !props.startsInExistingWorkspace}
             submitShortcutModifierLabel={getScreenSubmitModifierLabel()}
           />
         </div>

@@ -407,6 +407,7 @@ function QuickTabBody({
             />
           ) : undefined
         }
+        startsInExistingWorkspace={existingWorktreeId !== null}
         {...cardProps}
         primaryActionLabel={primaryActionLabel}
         onOpenAgentSettings={() => setAgentSettingsOpen(true)}
